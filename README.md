@@ -1,13 +1,14 @@
 # 🏥 Odoo 19 Multi-Tenant Docker - Examen ERP
 
 **Infrastructure multi-entreprises isolées avec Docker Compose**  
-*Projet démontrant la maîtrise d'Odoo en mode SaaS pour 2 entreprises.*
+*Projet démontrant la maîtrise d'Odoo.*
 
 ## 📋 Architecture
 
 entreprise_a/ entreprise_b/
 ├── docker-compose.yml ├── docker-compose.yml
 ├── odoo-data/ ├── odoo-data/
+
 
 text
 
@@ -32,9 +33,9 @@ cd entreprise_b
 docker-compose up -d
 Accès :
 
-Entreprise A : http://localhost:8069 (admin/password)
-
-Entreprise B : http://localhost:9069 (admin/password)
+   Service	             Entreprise A	     Entreprise B
+Odoo ERP (v19)	        http://localhost:8069	http://localhost:9069
+pgAdmin 4 (Gestion DB)	http://localhost:5050	http://localhost:5051
 
 🔒 Sécurité (15% note)
 Réseaux isolés Docker personnalisés :
@@ -47,14 +48,11 @@ Variables secrets : ${DB_PASSWORD} → jamais en clair GitHub
 
 Conformité : RGPD-ready, parfait pour multi-clients
 
-🛠️ Bonnes Pratiques
-✅ .gitignore : Volumes exclus (Go de données)
+Chaque environnement inclut une instance pgAdmin isolée pour la maintenance.
 
-✅ README structuré
+Email de connexion : abdel.belmoufadal@gmail.com
 
-✅ Variables d'environnement
-
-✅ Réseaux nommés explicites
+Mot de passe : 19451010
 
 📊 Avantages Multi-Tenant
 Entreprise	Réseau	Port Odoo	Base PG
@@ -65,5 +63,7 @@ Scalabilité : Ajouter entreprise_c = dupliquer le dossier !
 👨‍💼 Contexte Professionnel
 Chef d'unité recouvrement - Hôpital Duc de Tovar, Tanger
 Adapté pour gestion multi-sites hospitaliers avec isolation stricte.
-
 Abderrahim BELMOUFADAL - ERP Odoo | Février 2026
+
+
+

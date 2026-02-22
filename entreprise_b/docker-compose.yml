@@ -1,40 +1,57 @@
-version: '3.8'
+version: '3.8' # Version du format Docker Compose
 
 services:
   db_b:
-    image: postgres:15
-    container_name: db_entreprise_b
-    restart: always  # <-- DÉMARRAGE AUTOMATIQUE : Relance la DB si elle s'arrête ou après un reboot
+    # Service de base de données PostgreSQL pour l'Entreprise B
+    image: postgres:15 # Image PostgreSQL stable
+    container_name: db_entreprise_b # Nom unique du conteneur
+    restart: always # DÉMARRAGE AUTOMATIQUE : Relance le service si nécessaire
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=odoo
-      - POSTGRES_PASSWORD=odoo_secure_b # Mot de passe propre à l'Entreprise B
+      - POSTGRES_PASSWORD=odoo_secure_b # Mot de passe spécifique à l'Entreprise B
     volumes:
-      - odoo-db-data-b:/var/lib/postgresql/data # PERSISTANCE : Stocke les données de la DB sur mon disque
+      - odoo-db-data-b:/var/lib/postgresql/data # PERSISTANCE : Sauvegarde les données sur le disque
     networks:
-      - network_b # ISOLATION : Place la DB dans un réseau privé pour l'Entreprise B
+      - network_b # ISOLATION : Connecté au réseau privé B
 
   web_b:
-    image: odoo:19.0
+    # Service applicatif Odoo pour l'Entreprise B
+    image: odoo:19.0 # Version 19 demandée pour l'examen
     container_name: web_entreprise_b
-    restart: always  # <-- DÉMARRAGE AUTOMATIQUE : Odoo réessaie de se lancer jusqu'à ce que la DB réponde
+    restart: always # FIABILITÉ : Réessaie de se lancer jusqu'à ce que la DB soit prête
     depends_on:
-      - db_b
+      - db_b # Ordre de démarrage : la DB avant Odoo
     ports:
-      - "9069:8069" # ACCÈS : Utilise le port 9069 sur mon PC pour ne pas entrer en conflit avec le 8069 de l'Entreprise A
+      - "9069:8069" # ACCÈS : Accès via le port 9069 sur ton PC
     environment:
-      - HOST=db_b
+      - HOST=db_b # Connexion à la base de données via le nom du service
       - USER=odoo
-      - PASSWORD=odoo_secure_b # Doit être identique au mot de passe de db_b
+      - PASSWORD=odoo_secure_b
     volumes:
-      - odoo-web-data-b:/var/lib/odoo # PERSISTANCE : Stocke tes documents Odoo (logos, images, factures)
+      - odoo-web-data-b:/var/lib/odoo # PERSISTANCE : Sauvegarde les fichiers d'Odoo
     networks:
-      - network_b # ISOLATION : Connecte Odoo au réseau privé de l'Entreprise B
+      - network_b # ISOLATION : Réseau privé B
+
+  pgadmin_b:
+    # AJOUT : Outil de gestion visuelle pour l'Entreprise B
+    image: dpage/pgadmin4 # Image officielle pgAdmin
+    container_name: pgadmin_entreprise_b
+    restart: always # Redémarrage automatique activé
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=abdel.belmoufadal@gmail.com # Email de connexion
+      - PGADMIN_DEFAULT_PASSWORD=19451010 # Mot de passe de connexion
+    ports:
+      - "5051:80" # ACCÈS : Port 5051 pour éviter le conflit avec l'Entreprise A
+    networks:
+      - network_b # Connecté au réseau de l'Entreprise B pour accéder à sa DB
 
 networks:
-  network_b: # DÉFINITION : Crée une barrière de sécurité (bulle) isolée pour cette entreprise
+  network_b:
+    # DÉFINITION du réseau isolé pour l'Entreprise B
     driver: bridge
 
 volumes:
-  odoo-db-data-b: # Réservation de l'espace disque pour les données de la DB
-  odoo-web-data-b: # Réservation de l'espace disque pour les fichiers Odoo
+  # DÉFINITION des espaces de stockage persistants
+  odoo-db-data-b:
+  odoo-web-data-b:
