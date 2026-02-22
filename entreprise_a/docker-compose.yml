@@ -1,29 +1,40 @@
-version: '3.8'
+version: '3.8' # Version du format Docker Compose utilisé
+
 services:
-  db_a:
-    image: postgres:15
-    container_name: db_entreprise_a
+  db_a: # Nom du service pour la base de données
+    image: postgres:15 # Utilise l'image officielle PostgreSQL version 15
+    container_name: db_entreprise_a # Nom personnalisé du conteneur dans Docker/Portainer
+    restart: always # <-- FORCE LE REDÉMARRAGE si le conteneur s'arrête ou si le PC redémarre
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=odoo
-      - POSTGRES_PASSWORD=odoo_secure_a
+      - POSTGRES_DB=postgres # Nom de la base de données créée par défaut
+      - POSTGRES_USER=odoo # Nom de l'utilisateur administrateur de la base
+      - POSTGRES_PASSWORD=odoo_secure_a # Mot de passe (doit être identique à celui du service web)
     volumes:
-      - odoo-db-data-a:/var/lib/postgresql/data
+      - odoo-db-data-a:/var/lib/postgresql/data # STOCKAGE PERSISTANT : les données restent même si on supprime le conteneur
+    networks:
+      - network_a # ISOLATION : Connecte la DB à une "bulle" privée pour l'Entreprise A
 
-  web_a:
-    image: odoo:19.0
-    container_name: web_entreprise_a
+  web_a: # Nom du service pour l'application Odoo
+    image: odoo:19.0 # Utilise la dernière version d'Odoo (v19)
+    container_name: web_entreprise_a # Nom personnalisé pour Portainer
+    restart: always # <-- INDISPENSABLE : Odoo attend que la DB soit prête. S'il échoue, il réessaie tout seul
     depends_on:
-      - db_a
+      - db_a # Dit à Docker de lancer la base de données AVANT de lancer Odoo
     ports:
-      - "8069:8069"
+      - "8069:8069" # ACCÈS : Relie le port 8069 de mon PC au port 8069 interne d'Odoo
     environment:
-      - HOST=db_a
-      - USER=odoo
-      - PASSWORD=odoo_secure_a
+      - HOST=db_a # Indique à Odoo l'adresse du serveur de base de données (nom du service)
+      - USER=odoo # Utilisateur pour se connecter à la DB
+      - PASSWORD=odoo_secure_a # Mot de passe pour se connecter à la DB
     volumes:
-      - odoo-web-data-a:/var/lib/odoo
+      - odoo-web-data-a:/var/lib/odoo # STOCKAGE PERSISTANT : Sauvegarde tes logos, images et documents
+    networks:
+      - network_a # ISOLATION : Odoo et la DB sont sur le même réseau privé
 
-volumes:
-  odoo-db-data-a:
-  odoo-web-data-a:
+networks:
+  network_a: # DÉFINITION du réseau privé (Bulle de sécurité pour l'Entreprise A)
+    driver: bridge
+
+volumes: # DÉFINITION des espaces de stockage sur mon disque dur
+  odoo-db-data-a: # Volume pour la base de données
+  odoo-web-data-a: # Volume pour les fichiers Odoo
